@@ -1360,7 +1360,7 @@ function showOurSnaps() {
             });
 
         },
-        100
+        4000
     );
 
 }
