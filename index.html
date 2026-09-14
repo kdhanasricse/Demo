@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>A Little Something For You</title>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <!-- =========================
+         INTRO
+    ========================= -->
+
+    <section id="intro" class="intro-section">
+
+        <div class="intro-content">
+
+            <p class="small-title">A LITTLE SOMETHING I MADE FOR YOU</p>
+
+            <h1>Before we begin...</h1>
+
+            <p class="intro-text">
+                Make your wish and blow the candles.
+            </p>
+
+            <button id="wishButton" class="main-button">
+                Make a Wish
+            </button>
+
+        </div>
+
+    </section>
+
+
+    <!-- =========================
+         CAKE
+    ========================= -->
+
+    <section id="cakeSection" class="cake-section hidden">
+
+        <div class="cake-content">
+
+            <p class="small-title">MAKE A WISH</p>
+
+            <h2>Your wish is waiting...</h2>
+
+            <p id="micStatus" class="mic-status">
+                Click below and blow on the candles.
+            </p>
+
+            <div class="cake">
+
+                <div class="candle candle-1">
+                    <div class="flame"></div>
+                    <div class="smoke"></div>
+                </div>
+
+                <div class="candle candle-2">
+                    <div class="flame"></div>
+                    <div class="smoke"></div>
+                </div>
+
+                <div class="candle candle-3">
+                    <div class="flame"></div>
+                    <div class="smoke"></div>
+                </div>
+
+                <div class="candle candle-4">
+                    <div class="flame"></div>
+                    <div class="smoke"></div>
+                </div>
+
+                <div class="candle candle-5">
+                    <div class="flame"></div>
+                    <div class="smoke"></div>
+                </div>
+
+                <div class="cake-top"></div>
+                <div class="cake-middle"></div>
+                <div class="cake-bottom"></div>
+
+            </div>
+
+            <button id="blowButton" class="main-button">
+                🎙 Start Blowing
+            </button>
+
+        </div>
+
+    </section>
+
+
+    <!-- =========================
+         BIRTHDAY
+    ========================= -->
+
+    <section id="birthdaySection" class="birthday-section hidden">
+
+        <div class="birthday-content">
+
+            <p class="birthday-line">HAPPPPYYYY</p>
+
+            <p class="birthday-line">BIRTHDAYYY</p>
+
+            <p class="birthday-friend">
+                MY BESTESTTTTT FRIEND 💙
+            </p>
+
+            <button id="storyButton" class="main-button">
+                Our Story
+            </button>
+
+        </div>
+
+    </section>
+
+
+    <!-- =========================
+         STORY
+    ========================= -->
+
+    <section id="storySection" class="story-section hidden">
+
+        <div class="story-container">
+
+            <div id="closedBook" class="closed-book">
+
+                <div class="book-cover">
+
+                    <p>OUR STORY</p>
+
+                    <h2>From Then<br>To Now</h2>
+
+                    <span>Open me...</span>
+
+                </div>
+
+            </div>
+
+
+            <button id="openBookButton" class="main-button hidden">
+                Open Our Story
+            </button>
+
+
+            <div id="openBook" class="open-book hidden">
+
+                <div class="story-page">
+
+                    <p class="story-page-number">
+                        PAGE <span id="pageNumber">01</span>
+                    </p>
+
+                    <img
+                        id="storyPageImage"
+                        src="sheet1.png"
+                        alt="Our Story"
+                    >
+
+                    <div id="storyQuestion" class="story-question hidden">
+
+                        <h3 id="questionText"></h3>
+
+                        <div id="answerOptions" class="answer-options"></div>
+
+                        <p id="answerFeedback" class="answer-feedback"></p>
+
+                    </div>
+
+                </div>
+
+
+                <div id="storyAssistant" class="story-assistant">
+
+                    <p id="storySpeech">
+                        Turn the page...
+                    </p>
+
+                </div>
+
+
+                <button id="storyClosing" class="main-button hidden">
+                    Close Our Story
+                </button>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- =========================
+         CHAPTER TWO
+         YOU, THROUGH THE YEARS
+    ========================= -->
+
+    <section id="photosSection" class="photos-section hidden">
+
+        <div class="photos-heading">
+
+            <p class="section-small-title">
+                CHAPTER TWO
+            </p>
+
+            <h2>You, Through the Years</h2>
+
+            <p>
+                A few moments that made their way into memories.
+            </p>
+
+        </div>
+
+
+        <div class="memory-frame" id="memoryFrame">
+
+            <button
+                id="memoryPrev"
+                class="memory-arrow memory-prev"
+                aria-label="Previous photo"
+            >
+                ‹
+            </button>
+
+
+            <div class="memory-photo-wrap">
+
+                <img
+                    id="memoryPhoto"
+                    src="pic1.jpg"
+                    alt="Memory"
+                >
+
+                <p id="memoryCaption">
+                    Where it began
+                </p>
+
+            </div>
+
+
+            <button
+                id="memoryNext"
+                class="memory-arrow memory-next"
+                aria-label="Next photo"
+            >
+                ›
+            </button>
+
+        </div>
+
+
+        <div id="memoryDots" class="memory-dots"></div>
+
+        <p id="memoryCurrent" class="memory-current">
+            01 / 09
+        </p>
+
+
+        <button id="photosNextButton" class="main-button">
+            Keep going...
+        </button>
+
+    </section>
+
+
+    <!-- =========================
+         BEFORE THE SNAPS
+    ========================= -->
+
+    <section
+        id="snapQuestions"
+        class="snap-questions-section"
+    >
+
+        <div class="snap-question-box">
+
+            <p class="section-small-title">
+                BEFORE THE SNAPS
+            </p>
+
+            <h2 id="snapQuestionTitle">
+                Do we have pictures together?
+            </h2>
+
+
+            <div
+                id="snapQuestionOptions"
+                class="snap-question-options"
+            >
+
+                <button
+                    class="snap-answer-button"
+                    data-answer="yes"
+                >
+                    Yes
+                </button>
+
+                <button
+                    class="snap-answer-button"
+                    data-answer="no"
+                >
+                    No
+                </button>
+
+            </div>
+
+
+            <p
+                id="snapQuestionFeedback"
+                class="snap-question-feedback"
+            ></p>
+
+        </div>
+
+    </section>
+
+
+    <!-- =========================
+         CHAPTER THREE
+         OUR SNAPS
+    ========================= -->
+
+    <section
+        class="next-section snap-section"
+        id="nextSection"
+    >
+
+        <div class="snap-heading">
+
+            <p class="section-small-title">
+                CHAPTER THREE
+            </p>
+
+            <h2>Our Snaps</h2>
+
+            <p>
+                Random moments, random laughs, that we did virtually.
+            </p>
+
+        </div>
+
+
+        <div class="snap-wall" id="snapWall">
+
+            <div class="snap-item">
+
+                <img
+                    src="snap1.jpg"
+                    alt="Snap 1"
+                    draggable="false"
+                >
+
+                <span class="snap-label">
+                    Snap 01
+                </span>
+
+            </div>
+
+
+            <div class="snap-item">
+
+                <img
+                    src="snap2.jpg"
+                    alt="Snap 2"
+                    draggable="false"
+                >
+
+                <span class="snap-label">
+                    Snap 02
+                </span>
+
+            </div>
+
+
+            <div class="snap-item">
+
+                <img
+                    src="snap3.jpg"
+                    alt="Snap 3"
+                    draggable="false"
+                >
+
+                <span class="snap-label">
+                    Snap 03
+                </span>
+
+            </div>
+
+
+            <div class="snap-item">
+
+                <img
+                    src="snap4.jpg"
+                    alt="Snap 4"
+                    draggable="false"
+                >
+
+                <span class="snap-label">
+                    Snap 04
+                </span>
+
+            </div>
+
+
+            <div class="snap-item">
+
+                <img
+                    src="snap5.jpg"
+                    alt="Snap 5"
+                    draggable="false"
+                >
+
+                <span class="snap-label">
+                    Snap 05
+                </span>
+
+            </div>
+
+
+            <div class="snap-item">
+
+                <img
+                    src="snap6.jpg"
+                    alt="Snap 6"
+                    draggable="false"
+                >
+
+                <span class="snap-label">
+                    Snap 06
+                </span>
+
+            </div>
+
+
+            <div class="snap-item">
+
+                <img
+                    src="snap7.jpg"
+                    alt="Snap 7"
+                    draggable="false"
+                >
+
+                <span class="snap-label">
+                    Snap 07
+                </span>
+
+            </div>
+
+        </div>
+
+
+        <div class="snap-ending">
+
+            <p>
+                Just seven little snaps...
+            </p>
+
+            <span>
+                but somehow, they carry a lot of memories.
+            </span>
+
+        </div>
+
+
+        <!-- SNAP LIGHTBOX -->
+
+        <div
+            id="snapLightbox"
+            class="snap-lightbox hidden"
+        >
+
+            <button
+                id="snapClose"
+                class="snap-close"
+                aria-label="Close"
+            >
+                ×
+            </button>
+
+
+            <div class="snap-lightbox-content">
+
+                <button
+                    id="snapPrev"
+                    class="snap-lightbox-button snap-lightbox-prev"
+                    aria-label="Previous snap"
+                >
+                    ‹
+                </button>
+
+
+                <img
+                    id="snapLightboxImage"
+                    src="snap1.jpg"
+                    alt="Snap 1"
+                    draggable="false"
+                >
+
+
+                <button
+                    id="snapNext"
+                    class="snap-lightbox-button snap-lightbox-next"
+                    aria-label="Next snap"
+                >
+                    ›
+                </button>
+
+            </div>
+
+
+            <div
+                id="snapCounter"
+                class="snap-counter"
+            >
+                01 / 07
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- =========================
+         A GIFT FOR YOU
+    ========================= -->
+
+    <section
+        id="giftSection"
+        class="gift-section hidden"
+    >
+
+        <div class="gift-content">
+
+            <p class="section-small-title">
+                ONE LAST THING
+            </p>
+
+            <h2>A Gift For You</h2>
+
+            <p class="gift-subtitle">
+                I made one more little thing...
+            </p>
+
+
+            <div
+                id="envelope"
+                class="envelope"
+            >
+
+                <div class="envelope-back"></div>
+
+                <div class="envelope-paper"></div>
+
+                <div class="envelope-front"></div>
+
+                <div class="envelope-flap"></div>
+
+                <div class="envelope-label">
+                    For You
+                </div>
+
+            </div>
+
+
+            <p class="envelope-hint">
+                Click the envelope
+            </p>
+
+
+            <div
+                id="letterOverlay"
+                class="letter-overlay hidden"
+            >
+
+                <button
+                    id="letterClose"
+                    class="letter-close"
+                    aria-label="Close letter"
+                >
+                    ×
+                </button>
+
+                <div class="letter-image-wrapper">
+
+                    <img
+                        id="letterImage"
+                        src="myletter.png"
+                        alt="A letter for you"
+                    >
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- =========================
+         AUDIO
+    ========================= -->
+
+    <audio id="birthdayTune" loop>
+        <source src="birthday.mp3" type="audio/mpeg">
+    </audio>
+
+
+    <audio id="storyTune" loop>
+        <source src="story.mp3" type="audio/mpeg">
+    </audio>
+
+<section id="endSection" class="end-section">
+
+    <h1>THE END</h1>
+
+</section>
+
+
+    <script src="script.js"></script>
+
+</body>
+
+</html>
