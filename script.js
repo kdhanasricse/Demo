@@ -1,3 +1,4 @@
+```js
 /* =========================
    BASIC ELEMENTS
 ========================= */
@@ -1352,6 +1353,13 @@ function showOurSnaps() {
     );
 
 
+    /*
+     * Move to the Snap section once.
+     * There is NO delayed timer here.
+     * The user can stay on the Snap section
+     * as long as they want.
+     */
+
     nextSection.scrollIntoView({
         behavior: "smooth"
     );
@@ -1956,6 +1964,13 @@ snapLightbox.addEventListener(
  * When the user reaches the bottom
  * of the snaps section, the gift
  * section becomes visible.
+ *
+ * IMPORTANT:
+ * There is NO scrollIntoView()
+ * inside showGiftSection().
+ *
+ * So the page will NOT automatically
+ * jump to the gift section.
  */
 
 const giftObserver =
@@ -1988,3 +2003,4 @@ giftObserver.observe(
         "nextSection"
     )
 );
+```
