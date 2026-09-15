@@ -1352,17 +1352,9 @@ function showOurSnaps() {
     );
 
 
-    /*
-     * Scroll to Our Snaps only once.
-     *
-     * There is NO timer here.
-     * The user can stay and view
-     * the photos for as long as needed.
-     */
-
     nextSection.scrollIntoView({
         behavior: "smooth"
-    });
+    );
 
 }
 
@@ -1427,10 +1419,6 @@ const snapNext =
     );
 
 
-/* =========================
-   SNAP PHOTOS
-========================= */
-
 const snapPhotos = [
 
     "snap1.jpg",
@@ -1443,10 +1431,6 @@ const snapPhotos = [
 
 ];
 
-
-/* =========================
-   SNAP TITLES
-========================= */
 
 const snapTitles = [
 
@@ -1467,80 +1451,51 @@ const snapTitles = [
 ];
 
 
-let currentSnap = 0;
-
-
 /* =========================
    SNAP SECTION TITLE
 ========================= */
 
-const nextSection =
-    document.getElementById(
-        "nextSection"
+const snapHeading =
+    document.querySelector(
+        ".snap-heading h2"
     );
 
 
-let snapSectionTitle =
-    document.getElementById(
-        "snapSectionTitle"
-    );
+if (snapHeading) {
 
-
-if (!snapSectionTitle) {
-
-    snapSectionTitle =
-        document.createElement(
-            "h2"
-        );
-
-    snapSectionTitle.id =
-        "snapSectionTitle";
-
-    snapSectionTitle.textContent =
+    snapHeading.textContent =
         "Memories That We Cherish Virtually 😂";
-
-    nextSection.insertBefore(
-        snapSectionTitle,
-        nextSection.firstChild
-    );
 
 }
 
 
 /* =========================
-   SNAP TITLE ELEMENT
+   SNAP CAPTIONS
 ========================= */
 
-let snapTitle =
-    document.getElementById(
-        "snapTitle"
+const snapLabels =
+    document.querySelectorAll(
+        ".snap-label"
     );
 
 
-if (!snapTitle) {
+snapLabels.forEach(
+    function (label, index) {
 
-    snapTitle =
-        document.createElement(
-            "p"
-        );
+        if (
+            snapTitles[index]
+        ) {
 
-    snapTitle.id =
-        "snapTitle";
+            label.textContent =
+                snapTitles[index];
 
-    snapTitle.textContent =
-        snapTitles[0];
+        }
 
-    /*
-     * Put the title directly
-     * after the Snap image.
-     */
+    }
+);
 
-    snapLightboxImage.insertAdjacentElement(
-        "afterend",
-        snapTitle
-    );
 
-}
+let currentSnap = 0;
 
 
 /* =========================
@@ -1590,16 +1545,6 @@ function showSnap(index) {
         String(
             snapPhotos.length
         ).padStart(2, "0");
-
-
-    /*
-     * Update visible Snap title
-     */
-
-    snapTitle.textContent =
-        snapTitles[
-            currentSnap
-        ];
 
 }
 
@@ -1874,11 +1819,6 @@ function showGiftSection() {
         "hidden"
     );
 
-
-    giftSection.scrollIntoView({
-        behavior: "smooth"
-    });
-
 }
 
 
@@ -1979,4 +1919,72 @@ document.addEventListener(
         }
 
     }
+);
+
+
+/* =========================
+   SHOW GIFT AFTER SNAPS
+========================= */
+
+snapLightbox.addEventListener(
+    "click",
+    function (event) {
+
+        /*
+         * The gift section should appear
+         * after the user finishes with the
+         * snaps.
+         */
+
+        if (
+            event.target ===
+            snapLightbox
+        ) {
+
+            return;
+
+        }
+
+    }
+);
+
+
+/*
+ * Add the gift section after the
+ * "Our Snaps" section naturally.
+ *
+ * When the user reaches the bottom
+ * of the snaps section, the gift
+ * section becomes visible.
+ */
+
+const giftObserver =
+    new IntersectionObserver(
+        function (entries) {
+
+            entries.forEach(
+                function (entry) {
+
+                    if (
+                        entry.isIntersecting
+                    ) {
+
+                        showGiftSection();
+
+                    }
+
+                }
+            );
+
+        },
+        {
+            threshold: 0.15
+        }
+    );
+
+
+giftObserver.observe(
+    document.getElementById(
+        "nextSection"
+    )
 );
