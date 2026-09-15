@@ -1471,6 +1471,79 @@ let currentSnap = 0;
 
 
 /* =========================
+   SNAP SECTION TITLE
+========================= */
+
+const nextSection =
+    document.getElementById(
+        "nextSection"
+    );
+
+
+let snapSectionTitle =
+    document.getElementById(
+        "snapSectionTitle"
+    );
+
+
+if (!snapSectionTitle) {
+
+    snapSectionTitle =
+        document.createElement(
+            "h2"
+        );
+
+    snapSectionTitle.id =
+        "snapSectionTitle";
+
+    snapSectionTitle.textContent =
+        "Memories That We Cherish Virtually 😂";
+
+    nextSection.insertBefore(
+        snapSectionTitle,
+        nextSection.firstChild
+    );
+
+}
+
+
+/* =========================
+   SNAP TITLE ELEMENT
+========================= */
+
+let snapTitle =
+    document.getElementById(
+        "snapTitle"
+    );
+
+
+if (!snapTitle) {
+
+    snapTitle =
+        document.createElement(
+            "p"
+        );
+
+    snapTitle.id =
+        "snapTitle";
+
+    snapTitle.textContent =
+        snapTitles[0];
+
+    /*
+     * Put the title directly
+     * after the Snap image.
+     */
+
+    snapLightboxImage.insertAdjacentElement(
+        "afterend",
+        snapTitle
+    );
+
+}
+
+
+/* =========================
    SHOW SNAP
 ========================= */
 
@@ -1519,22 +1592,14 @@ function showSnap(index) {
         ).padStart(2, "0");
 
 
-    /* Update visible Snap title */
+    /*
+     * Update visible Snap title
+     */
 
-    const snapTitle =
-        document.getElementById(
-            "snapTitle"
-        );
-
-
-    if (snapTitle) {
-
-        snapTitle.textContent =
-            snapTitles[
-                currentSnap
-            ];
-
-    }
+    snapTitle.textContent =
+        snapTitles[
+            currentSnap
+        ];
 
 }
 
