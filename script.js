@@ -1306,7 +1306,7 @@ function handleSnapAnswer(answer) {
             }
 
         },
-        1000
+        5000
     );
 
 }
