@@ -1,1858 +1,1731 @@
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
+```javascript
+/* =========================================================
+   BASIC ELEMENTS
+========================================================= */
+
+const wishButton =
+    document.getElementById("wishButton");
+
+const cakeSection =
+    document.getElementById("cakeSection");
+
+const birthdaySection =
+    document.getElementById("birthdaySection");
+
+const storySection =
+    document.getElementById("storySection");
+
+const photosSection =
+    document.getElementById("photosSection");
+
+const storyButton =
+    document.getElementById("storyButton");
+
+const birthdayTune =
+    document.getElementById("birthdayTune");
+
+const storyTune =
+    document.getElementById("storyTune");
 
 
-html {
-    scroll-behavior: smooth;
-}
+/* =========================================================
+   WISH BUTTON
+========================================================= */
+
+wishButton.addEventListener(
+    "click",
+    function () {
+
+        const intro =
+            document.getElementById("intro");
+
+        intro.classList.add("hidden");
+
+        cakeSection.classList.remove("hidden");
+
+        cakeSection.scrollIntoView({
+            behavior: "smooth"
+        });
+    }
+);
 
 
-body {
-    font-family: Georgia, "Times New Roman", serif;
+/* =========================================================
+   CAKE + MICROPHONE
+========================================================= */
 
-    background:
-        radial-gradient(
-            circle at top,
-            #3a2016 0%,
-            #1d0e09 45%,
-            #0d0604 100%
+const blowButton =
+    document.getElementById("blowButton");
+
+const micStatus =
+    document.getElementById("micStatus");
+
+const candles =
+    document.querySelectorAll(".candle");
+
+let microphoneStream = null;
+let audioContext = null;
+let analyser = null;
+let microphoneSource = null;
+let blowing = false;
+
+
+/* =========================================================
+   DETECT BLOW
+========================================================= */
+
+blowButton.addEventListener(
+    "click",
+    async function () {
+
+        if (blowing) {
+            return;
+        }
+
+        blowing = true;
+
+        micStatus.textContent =
+            "Blow into your microphone...";
+
+        try {
+
+            microphoneStream =
+                await navigator.mediaDevices.getUserMedia({
+                    audio: true
+                });
+
+            audioContext =
+                new (window.AudioContext ||
+                    window.webkitAudioContext)();
+
+            analyser =
+                audioContext.createAnalyser();
+
+            analyser.fftSize = 256;
+
+            microphoneSource =
+                audioContext.createMediaStreamSource(
+                    microphoneStream
+                );
+
+            microphoneSource.connect(
+                analyser
+            );
+
+            detectBlow();
+
+        } catch (error) {
+
+            micStatus.textContent =
+                "Microphone access was not available. Click the button and try again.";
+
+            blowing = false;
+        }
+    }
+);
+
+
+function detectBlow() {
+
+    if (!analyser) {
+        return;
+    }
+
+    const dataArray =
+        new Uint8Array(
+            analyser.frequencyBinCount
         );
 
-    color: #f3dfc8;
+    analyser.getByteTimeDomainData(
+        dataArray
+    );
 
-    min-height: 100vh;
+    let sum = 0;
 
-    overflow-x: hidden;
-}
+    for (
+        let i = 0;
+        i < dataArray.length;
+        i++
+    ) {
 
+        const value =
+            (dataArray[i] - 128) / 128;
 
-.hidden {
-    display: none !important;
-}
+        sum += value * value;
+    }
 
-
-/* =========================
-   COMMON
-========================= */
-
-.small-title,
-.section-small-title {
-    font-size: 0.75rem;
-    letter-spacing: 4px;
-    color: #a98262;
-    text-transform: uppercase;
-}
-
-
-.main-button {
-    margin-top: 30px;
-
-    padding: 13px 28px;
-
-    border: 1px solid #8b6248;
-
-    border-radius: 30px;
-
-    background: #2c1710;
-
-    color: #efd4b6;
-
-    font-family: inherit;
-
-    font-size: 1rem;
-
-    cursor: pointer;
-
-    transition: 0.3s ease;
-}
-
-
-.main-button:hover {
-    background: #553224;
-
-    transform: translateY(-2px);
-}
-
-
-/* =========================
-   INTRO
-========================= */
-
-.intro-section {
-    min-height: 100vh;
-
-    display: flex;
-
-    align-items: center;
-    justify-content: center;
-
-    text-align: center;
-
-    padding: 30px;
-}
-
-
-.intro-content {
-    max-width: 700px;
-}
-
-
-.intro-content h1 {
-    font-size: clamp(3rem, 8vw, 6rem);
-
-    font-weight: normal;
-
-    margin: 25px 0;
-}
-
-
-.intro-text {
-    color: #c9a98b;
-
-    font-size: 1.15rem;
-}
-
-
-/* =========================
-   CAKE
-========================= */
-
-.cake-section {
-    min-height: 100vh;
-
-    display: flex;
-
-    justify-content: center;
-    align-items: center;
-
-    text-align: center;
-
-    padding: 40px 20px;
-}
-
-
-.cake-content {
-    width: 100%;
-}
-
-
-.cake-content h2 {
-    font-size: clamp(2rem, 5vw, 3.5rem);
-
-    font-weight: normal;
-
-    margin: 15px 0;
-}
-
-
-.mic-status {
-    color: #b99b82;
-
-    margin-top: 10px;
-}
-
-
-.cake {
-    width: 280px;
-    height: 250px;
-
-    margin: 60px auto 30px;
-
-    position: relative;
-}
-
-
-.cake-top {
-    position: absolute;
-
-    width: 230px;
-    height: 60px;
-
-    left: 25px;
-    top: 95px;
-
-    background:
-        linear-gradient(
-            to bottom,
-            #6d3924,
-            #4a2416
+    const volume =
+        Math.sqrt(
+            sum / dataArray.length
         );
 
-    border-radius: 50%;
+    if (volume > 0.12) {
 
-    z-index: 3;
-}
+        extinguishCandles();
 
-
-.cake-middle {
-    position: absolute;
-
-    width: 230px;
-    height: 75px;
-
-    left: 25px;
-    top: 115px;
-
-    background:
-        linear-gradient(
-            to right,
-            #5b2c1b,
-            #7b4229,
-            #4a2416
-        );
-
-    z-index: 2;
-}
-
-
-.cake-bottom {
-    position: absolute;
-
-    width: 250px;
-    height: 65px;
-
-    left: 15px;
-    top: 175px;
-
-    background:
-        linear-gradient(
-            to right,
-            #492215,
-            #693720,
-            #3e1c12
-        );
-
-    border-radius: 0 0 18px 18px;
-
-    z-index: 1;
-}
-
-
-.candle {
-    position: absolute;
-
-    width: 15px;
-    height: 75px;
-
-    top: 30px;
-
-    background:
-        linear-gradient(
-            to right,
-            #e2c1a2,
-            #b98461,
-            #e7c9aa
-        );
-
-    border-radius: 4px 4px 2px 2px;
-
-    z-index: 5;
-}
-
-
-.candle-1 {
-    left: 45px;
-}
-
-
-.candle-2 {
-    left: 95px;
-}
-
-
-.candle-3 {
-    left: 132px;
-}
-
-
-.candle-4 {
-    left: 169px;
-}
-
-
-.candle-5 {
-    left: 219px;
-}
-
-
-.flame {
-    position: absolute;
-
-    width: 17px;
-    height: 26px;
-
-    top: -27px;
-    left: -1px;
-
-    background: #ffb13b;
-
-    border-radius: 50%;
-
-    box-shadow:
-        0 0 15px #ff9c2b,
-        0 0 30px rgba(255, 154, 43, 0.5);
-
-    animation:
-        flameMove 0.5s infinite alternate;
-}
-
-
-.smoke {
-    position: absolute;
-
-    width: 8px;
-    height: 8px;
-
-    left: 3px;
-    top: -12px;
-
-    background:
-        rgba(200, 190, 180, 0.4);
-
-    border-radius: 50%;
-
-    opacity: 0;
-}
-
-
-.candle.blown .flame {
-    display: none;
-}
-
-
-.candle.blown .smoke {
-    animation:
-        smokeRise 2s ease-out forwards;
-}
-
-
-@keyframes flameMove {
-
-    from {
-        transform:
-            scale(0.9)
-            rotate(-2deg);
+        return;
     }
 
-    to {
-        transform:
-            scale(1.1)
-            rotate(2deg);
-    }
-
-}
-
-
-@keyframes smokeRise {
-
-    0% {
-        opacity: 0.7;
-
-        transform:
-            translateY(0)
-            scale(1);
-    }
-
-    100% {
-        opacity: 0;
-
-        transform:
-            translateY(-45px)
-            scale(2.5);
-    }
-
-}
-
-
-/* =========================
-   BIRTHDAY
-========================= */
-
-.birthday-section {
-    min-height: 100vh;
-
-    display: flex;
-
-    align-items: center;
-    justify-content: center;
-
-    text-align: center;
-
-    padding: 30px;
-}
-
-
-.birthday-content {
-    animation:
-        birthdayAppear 1.2s ease;
-}
-
-
-.birthday-line {
-    font-size: clamp(3rem, 9vw, 7rem);
-
-    font-weight: bold;
-
-    letter-spacing: 3px;
-
-    margin: 5px 0;
-}
-
-
-.birthday-friend {
-    margin-top: 25px;
-
-    color: #d7b28e;
-
-    font-size: clamp(1.4rem, 4vw, 2.4rem);
-}
-
-
-@keyframes birthdayAppear {
-
-    from {
-        opacity: 0;
-
-        transform:
-            translateY(30px);
-    }
-
-    to {
-        opacity: 1;
-
-        transform:
-            translateY(0);
-    }
-
-}
-
-
-/* =========================
-   STORY
-========================= */
-
-.story-section {
-    min-height: 100vh;
-
-    padding: 80px 20px;
-
-    text-align: center;
-}
-
-
-.story-container {
-    max-width: 900px;
-
-    margin: auto;
-}
-
-
-.closed-book {
-    width: min(500px, 90vw);
-
-    height: 350px;
-
-    margin: 50px auto 30px;
-
-    perspective: 1000px;
-}
-
-
-.book-cover {
-    width: 100%;
-    height: 100%;
-
-    border: 1px solid #815b43;
-
-    border-radius: 8px;
-
-    background:
-        linear-gradient(
-            135deg,
-            #442419,
-            #24110b
-        );
-
-    box-shadow:
-        0 25px 60px rgba(0, 0, 0, 0.5);
-
-    display: flex;
-
-    flex-direction: column;
-
-    justify-content: center;
-    align-items: center;
-}
-
-
-.book-cover p {
-    letter-spacing: 5px;
-
-    color: #a98568;
-
-    font-size: 0.8rem;
-}
-
-
-.book-cover h2 {
-    font-size: 3rem;
-
-    font-weight: normal;
-
-    margin: 25px 0;
-}
-
-
-.book-cover span {
-    color: #98745b;
-}
-
-
-.open-book {
-    width: min(900px, 95vw);
-
-    margin: 30px auto;
-}
-
-
-.story-page {
-    background: #ead9c2;
-
-    padding: 25px;
-
-    color: #41261a;
-
-    border-radius: 6px;
-
-    box-shadow:
-        0 25px 60px rgba(0, 0, 0, 0.45);
-}
-
-
-.story-page-number {
-    color: #7d604c;
-
-    font-size: 0.7rem;
-
-    letter-spacing: 3px;
-
-    margin-bottom: 20px;
-}
-
-
-.story-page img {
-    width: 100%;
-
-    max-height: 70vh;
-
-    object-fit: contain;
-
-    display: block;
-
-    margin: auto;
-}
-
-
-.story-assistant {
-    margin-top: 20px;
-
-    color: #b99b82;
-}
-
-
-.story-question {
-    padding: 25px;
-
-    margin-top: 20px;
-
-    background: #dcc5a8;
-
-    border-radius: 8px;
-}
-
-
-.story-question h3 {
-    font-size: 1.3rem;
-
-    font-weight: normal;
-
-    margin-bottom: 20px;
-}
-
-
-.answer-options {
-    display: flex;
-
-    flex-wrap: wrap;
-
-    justify-content: center;
-
-    gap: 12px;
-}
-
-
-.answer-option {
-    padding: 10px 20px;
-
-    border: 1px solid #8b6248;
-
-    background: #43251a;
-
-    color: #efd7bd;
-
-    border-radius: 25px;
-
-    cursor: pointer;
-}
-
-
-.answer-option:hover {
-    background: #62402e;
-}
-
-
-.answer-feedback {
-    margin-top: 15px;
-
-    min-height: 22px;
-}
-
-
-/* =========================
-   CHAPTER TWO
-========================= */
-
-.photos-section {
-    min-height: 100vh;
-
-    padding: 100px 20px;
-
-    text-align: center;
-}
-
-
-.photos-heading {
-    max-width: 700px;
-
-    margin: auto;
-}
-
-
-.photos-heading h2 {
-    font-size: clamp(2.5rem, 6vw, 4.5rem);
-
-    font-weight: normal;
-
-    margin: 15px 0;
-}
-
-
-.photos-heading p:last-child {
-    color: #bfa48c;
-}
-
-
-.memory-frame {
-    width: min(900px, 92vw);
-
-    min-height: 520px;
-
-    margin: 60px auto 20px;
-
-    display: flex;
-
-    align-items: center;
-    justify-content: center;
-
-    gap: 20px;
-}
-
-
-.memory-photo-wrap {
-    max-width: 700px;
-
-    display: flex;
-
-    flex-direction: column;
-
-    align-items: center;
-}
-
-
-#memoryPhoto {
-    max-width: 100%;
-
-    max-height: 65vh;
-
-    width: auto;
-    height: auto;
-
-    object-fit: contain;
-
-    border-radius: 5px;
-
-    box-shadow:
-        0 25px 60px rgba(0, 0, 0, 0.5);
-
-    transition:
-        opacity 0.35s ease,
-        transform 0.35s ease;
-}
-
-
-#memoryCaption {
-    margin-top: 20px;
-
-    color: #d2b394;
-
-    font-size: 1.05rem;
-}
-
-
-.memory-arrow {
-    width: 50px;
-    height: 50px;
-
-    flex-shrink: 0;
-
-    border-radius: 50%;
-
-    border: 1px solid #765039;
-
-    background: #29150e;
-
-    color: #d7b38f;
-
-    font-size: 2rem;
-
-    cursor: pointer;
-
-    transition: 0.25s ease;
-}
-
-
-.memory-arrow:hover {
-    background: #543021;
-
-    transform: scale(1.08);
-}
-
-
-.memory-dots {
-    display: flex;
-
-    justify-content: center;
-
-    gap: 8px;
-
-    margin-top: 15px;
-}
-
-
-.memory-dot {
-    width: 7px;
-    height: 7px;
-
-    border-radius: 50%;
-
-    background: #63432f;
-
-    cursor: pointer;
-
-    transition: 0.25s ease;
-}
-
-
-.memory-dot.active {
-    background: #d0a77f;
-
-    transform: scale(1.4);
-}
-
-
-.memory-current {
-    margin-top: 15px;
-
-    color: #866750;
-
-    font-size: 0.8rem;
-
-    letter-spacing: 2px;
-}
-
-
-/* =========================
-   BEFORE THE SNAPS
-========================= */
-
-.snap-questions-section {
-    display: none;
-
-    min-height: 100vh;
-
-    padding: 110px 20px;
-
-    text-align: center;
-
-    align-items: center;
-    justify-content: center;
-}
-
-
-.snap-questions-section.show-questions {
-    display: flex;
-}
-
-
-.snap-question-box {
-    width: min(700px, 92vw);
-
-    padding: 55px 30px;
-
-    border: 1px solid #65442f;
-
-    border-radius: 14px;
-
-    background:
-        linear-gradient(
-            145deg,
-            rgba(62, 32, 22, 0.9),
-            rgba(27, 12, 8, 0.95)
-        );
-
-    box-shadow:
-        0 25px 70px rgba(0, 0, 0, 0.4);
-}
-
-
-.snap-question-box h2 {
-    font-size: clamp(2rem, 5vw, 3.5rem);
-
-    font-weight: normal;
-
-    line-height: 1.2;
-
-    margin: 25px 0 35px;
-}
-
-
-.snap-question-options {
-    display: flex;
-
-    justify-content: center;
-
-    gap: 18px;
-}
-
-
-.snap-answer-button {
-    min-width: 110px;
-
-    padding: 12px 28px;
-
-    border-radius: 30px;
-
-    border: 1px solid #8b6248;
-
-    background: #2c1710;
-
-    color: #efd4b6;
-
-    font-family: inherit;
-
-    font-size: 1rem;
-
-    cursor: pointer;
-
-    transition: 0.25s ease;
-}
-
-
-.snap-answer-button:hover {
-    background: #593525;
-
-    transform: translateY(-3px);
-}
-
-
-.snap-question-feedback {
-    min-height: 30px;
-
-    margin-top: 25px;
-
-    color: #d9b995;
-
-    font-size: 1.15rem;
-}
-
-
-/* =========================
-   CHAPTER THREE
-   OUR SNAPS
-========================= */
-
-.next-section {
-    min-height: 100vh;
-}
-
-
-.snap-section {
-    display: none;
-
-    padding: 110px 20px 120px;
-
-    text-align: center;
-}
-
-
-.snap-section.show-snaps {
-    display: block;
-}
-
-
-.snap-heading {
-    max-width: 800px;
-
-    margin: auto;
-}
-
-
-.snap-heading h2 {
-    font-size: clamp(2.5rem, 6vw, 4.5rem);
-
-    font-weight: normal;
-
-    margin: 15px 0;
-}
-
-
-.snap-heading > p:last-child {
-    color: #bfa48c;
-
-    font-size: 1.05rem;
-}
-
-
-/* =========================
-   SNAP WALL
-========================= */
-
-.snap-wall {
-    width: min(950px, 94vw);
-
-    margin: 70px auto 0;
-
-    display: grid;
-
-    grid-template-columns:
-        repeat(4, 1fr);
-
-    gap: 28px;
-
-    align-items: center;
-}
-
-
-.snap-item {
-    position: relative;
-
-    background: #f0dfc8;
-
-    padding: 12px 12px 30px;
-
-    border-radius: 3px;
-
-    box-shadow:
-        0 18px 35px rgba(0, 0, 0, 0.38);
-
-    cursor: pointer;
-
-    transition:
-        transform 0.3s ease,
-        box-shadow 0.3s ease;
-}
-
-
-.snap-item img {
-    width: 100%;
-
-    aspect-ratio: 1 / 1.12;
-
-    object-fit: cover;
-
-    display: block;
-}
-
-
-.snap-item:nth-child(1) {
-    transform: rotate(-4deg);
-}
-
-
-.snap-item:nth-child(2) {
-    transform: rotate(3deg);
-
-    margin-top: 22px;
-}
-
-
-.snap-item:nth-child(3) {
-    transform: rotate(-2deg);
-}
-
-
-.snap-item:nth-child(4) {
-    transform: rotate(4deg);
-
-    margin-top: 30px;
-}
-
-
-.snap-item:nth-child(5) {
-    transform: rotate(2deg);
-
-    margin-top: -10px;
-}
-
-
-.snap-item:nth-child(6) {
-    transform: rotate(-4deg);
-}
-
-
-.snap-item:nth-child(7) {
-    transform: rotate(3deg);
-
-    margin-top: 18px;
-}
-
-
-.snap-item:hover {
-    transform:
-        rotate(0deg)
-        translateY(-8px)
-        scale(1.03);
-
-    box-shadow:
-        0 25px 45px rgba(0, 0, 0, 0.5);
-
-    z-index: 3;
-}
-
-
-.snap-label {
-    position: absolute;
-
-    bottom: 8px;
-
-    left: 0;
-    right: 0;
-
-    color: #604533;
-
-    font-size: 0.75rem;
-
-    letter-spacing: 2px;
-
-    text-transform: uppercase;
-}
-
-
-/* =========================
-   SNAP ENDING
-========================= */
-
-.snap-ending {
-    margin-top: 60px;
-}
-
-
-.snap-ending p {
-    font-size: 1.5rem;
-
-    color: #d9b995;
-
-    margin-bottom: 8px;
-}
-
-
-.snap-ending span {
-    color: #927660;
-
-    font-size: 0.95rem;
-}
-
-
-/* =========================
-   SNAP LIGHTBOX
-========================= */
-
-.snap-lightbox {
-    position: fixed;
-
-    inset: 0;
-
-    z-index: 1000;
-
-    background:
-        rgba(10, 5, 3, 0.94);
-
-    display: flex;
-
-    align-items: center;
-    justify-content: center;
-
-    padding: 30px;
-}
-
-
-.snap-lightbox-content {
-    max-width: min(1000px, 95vw);
-
-    max-height: 88vh;
-
-    position: relative;
-
-    display: flex;
-
-    align-items: center;
-    justify-content: center;
-}
-
-
-.snap-lightbox img {
-    max-width: 75vw;
-
-    max-height: 82vh;
-
-    object-fit: contain;
-
-    display: block;
-
-    box-shadow:
-        0 25px 70px rgba(0, 0, 0, 0.55);
-}
-
-
-.snap-lightbox-button {
-    width: 48px;
-    height: 48px;
-
-    flex-shrink: 0;
-
-    border-radius: 50%;
-
-    border: 1px solid #80553b;
-
-    background: #2b1710;
-
-    color: #dfbd99;
-
-    font-size: 2rem;
-
-    cursor: pointer;
-
-    display: flex;
-
-    align-items: center;
-    justify-content: center;
-
-    transition: 0.25s ease;
-}
-
-
-.snap-lightbox-button:hover {
-    background: #573224;
-
-    transform: scale(1.08);
-}
-
-
-.snap-lightbox-prev {
-    margin-right: 20px;
-}
-
-
-.snap-lightbox-next {
-    margin-left: 20px;
-}
-
-
-.snap-close {
-    position: fixed;
-
-    top: 25px;
-    right: 30px;
-
-    width: 45px;
-    height: 45px;
-
-    border-radius: 50%;
-
-    border: 1px solid #80553b;
-
-    background: #2b1710;
-
-    color: #f0d8be;
-
-    font-size: 1.8rem;
-
-    cursor: pointer;
-
-    z-index: 1001;
-}
-
-
-.snap-counter {
-    position: fixed;
-
-    bottom: 25px;
-    left: 50%;
-
-    transform: translateX(-50%);
-
-    color: #d8b99a;
-
-    letter-spacing: 3px;
-
-    font-size: 0.8rem;
-}
-
-
-body.snap-open {
-    overflow: hidden;
-}
-
-
-/* =========================
-   MOBILE
-========================= */
-
-@media (max-width: 700px) {
-
-    .intro-content h1 {
-        font-size: 3rem;
-    }
-
-
-    .birthday-line {
-        font-size: 3rem;
-    }
-
-
-    .cake {
-        transform: scale(0.85);
-
-        margin-top: 35px;
-    }
-
-
-    .memory-frame {
-        min-height: 420px;
-
-        gap: 8px;
-    }
-
-
-    .memory-arrow {
-        width: 42px;
-        height: 42px;
-
-        font-size: 1.6rem;
-    }
-
-
-    .memory-photo-wrap {
-        width: calc(100% - 80px);
-    }
-
-
-    .snap-question-box {
-        padding: 45px 20px;
-    }
-
-
-    .snap-question-options {
-        gap: 12px;
-    }
-
-
-    .snap-answer-button {
-        min-width: 95px;
-
-        padding: 11px 20px;
-    }
-
-
-    .snap-wall {
-        grid-template-columns:
-            repeat(2, 1fr);
-
-        gap: 18px;
-
-        margin-top: 50px;
-    }
-
-
-    .snap-item {
-        padding: 8px 8px 24px;
-    }
-
-
-    .snap-item:nth-child(1) {
-        transform: rotate(-3deg);
-    }
-
-
-    .snap-item:nth-child(2) {
-        transform: rotate(3deg);
-
-        margin-top: 15px;
-    }
-
-
-    .snap-item:nth-child(3) {
-        transform: rotate(-2deg);
-    }
-
-
-    .snap-item:nth-child(4) {
-        transform: rotate(3deg);
-
-        margin-top: 15px;
-    }
-
-
-    .snap-item:nth-child(5) {
-        transform: rotate(2deg);
-
-        margin-top: -5px;
-    }
-
-
-    .snap-item:nth-child(6) {
-        transform: rotate(-3deg);
-    }
-
-
-    .snap-item:nth-child(7) {
-        transform: rotate(3deg);
-
-        margin-top: 12px;
-    }
-
-
-    .snap-label {
-        font-size: 0.6rem;
-
-        letter-spacing: 1px;
-
-        bottom: 5px;
-    }
-
-
-    .snap-lightbox {
-        padding: 15px;
-    }
-
-
-    .snap-lightbox-content {
-        max-width: 100%;
-    }
-
-
-    .snap-lightbox img {
-        max-width: 68vw;
-
-        max-height: 72vh;
-    }
-
-
-    .snap-lightbox-button {
-        width: 40px;
-        height: 40px;
-
-        font-size: 1.6rem;
-    }
-
-
-    .snap-lightbox-prev {
-        margin-right: 8px;
-    }
-
-
-    .snap-lightbox-next {
-        margin-left: 8px;
-    }
-
-
-    .snap-close {
-        top: 15px;
-        right: 15px;
-
-        width: 40px;
-        height: 40px;
-
-        font-size: 1.5rem;
-    }
-
+    requestAnimationFrame(
+        detectBlow
+    );
 }
 
 
 /* =========================================================
-   A GIFT FOR YOU
-   ADDED ONLY FOR THE FINAL SECTION
+   EXTINGUISH CANDLE
 ========================================================= */
 
-.gift-section {
-    min-height: 100vh;
+function extinguishCandles() {
 
-    padding: 120px 20px;
+    candles.forEach(
+        function (candle, index) {
 
-    text-align: center;
+            setTimeout(
+                function () {
 
-    display: flex;
+                    candle.classList.add(
+                        "blown"
+                    );
 
-    align-items: center;
-    justify-content: center;
+                },
+                index * 120
+            );
+        }
+    );
+
+    micStatus.textContent =
+        "Wish made... ✨";
+
+    if (microphoneStream) {
+
+        microphoneStream
+            .getTracks()
+            .forEach(
+                function (track) {
+                    track.stop();
+                }
+            );
+    }
+
+    if (audioContext) {
+        audioContext.close();
+    }
+
+    blowing = false;
+
+    setTimeout(
+        finishCake,
+        1400
+    );
 }
 
 
-.gift-content {
-    width: 100%;
+/* =========================================================
+   FINISH CAKE
+========================================================= */
 
-    max-width: 900px;
+function finishCake() {
 
-    margin: auto;
+    cakeSection.classList.add(
+        "hidden"
+    );
+
+    birthdaySection.classList.remove(
+        "hidden"
+    );
+
+    if (birthdayTune) {
+
+        birthdayTune.currentTime = 0;
+
+        birthdayTune.play().catch(
+            function () {}
+        );
+    }
+
+    birthdaySection.scrollIntoView({
+        behavior: "smooth"
+    });
 }
 
 
-.gift-content h2 {
-    font-size: clamp(3rem, 7vw, 5rem);
+/* =========================================================
+   BIRTHDAY → STORY
+========================================================= */
 
-    font-weight: normal;
+storyButton.addEventListener(
+    "click",
+    function () {
 
-    margin: 18px 0;
-}
-
-
-.gift-subtitle {
-    color: #bfa48c;
-
-    font-size: 1.1rem;
-
-    margin-bottom: 55px;
-}
-
-
-/* =========================
-   ENVELOPE
-========================= */
-
-.envelope {
-    position: relative;
-
-    width: min(500px, 85vw);
-
-    height: 330px;
-
-    margin: 30px auto 20px;
-
-    cursor: pointer;
-
-    filter:
-        drop-shadow(
-            0 25px 35px rgba(0, 0, 0, 0.45)
+        birthdaySection.classList.add(
+            "hidden"
         );
 
-    transition:
-        transform 0.35s ease;
-}
-
-
-.envelope:hover {
-    transform:
-        translateY(-8px)
-        scale(1.02);
-}
-
-
-/* Envelope body */
-
-.envelope-back {
-    position: absolute;
-
-    inset: 0;
-
-    background:
-        linear-gradient(
-            145deg,
-            #d8b48e,
-            #b98963
+        storySection.classList.remove(
+            "hidden"
         );
 
-    border-radius: 8px;
+        if (birthdayTune) {
+            birthdayTune.pause();
+        }
 
-    border: 1px solid #9c704f;
+        if (storyTune) {
 
-    z-index: 1;
-}
+            storyTune.currentTime = 0;
 
+            storyTune.play().catch(
+                function () {}
+            );
+        }
 
-/* Paper visible inside */
-
-.envelope-paper {
-    position: absolute;
-
-    width: 78%;
-
-    height: 78%;
-
-    left: 11%;
-
-    top: 4%;
-
-    background: #f4e6d0;
-
-    border-radius: 4px;
-
-    z-index: 2;
-
-    box-shadow:
-        0 5px 15px rgba(0, 0, 0, 0.15);
-}
+        storySection.scrollIntoView({
+            behavior: "smooth"
+        });
+    }
+);
 
 
-/* Front lower flap */
+/* =========================================================
+   STORY ELEMENTS
+========================================================= */
 
-.envelope-front {
-    position: absolute;
+const closedBook =
+    document.getElementById("closedBook");
 
-    left: 0;
-    bottom: 0;
+const openBookButton =
+    document.getElementById(
+        "openBookButton"
+    );
 
-    width: 100%;
+const openBook =
+    document.getElementById("openBook");
 
-    height: 70%;
+const storyPageImage =
+    document.getElementById(
+        "storyPageImage"
+    );
 
-    background:
-        linear-gradient(
-            145deg,
-            #c99b72,
-            #aa7652
+const pageNumber =
+    document.getElementById("pageNumber");
+
+const storyQuestion =
+    document.getElementById(
+        "storyQuestion"
+    );
+
+const questionText =
+    document.getElementById(
+        "questionText"
+    );
+
+const answerOptions =
+    document.getElementById(
+        "answerOptions"
+    );
+
+const answerFeedback =
+    document.getElementById(
+        "answerFeedback"
+    );
+
+const storyAssistant =
+    document.getElementById(
+        "storyAssistant"
+    );
+
+const storySpeech =
+    document.getElementById(
+        "storySpeech"
+    );
+
+const storyClosing =
+    document.getElementById(
+        "storyClosing"
+    );
+
+
+/* =========================================================
+   STORY DATA
+========================================================= */
+
+const storyPages = [
+    {
+        image: "sheet1.png",
+        question:
+            "Do you remember where our story began?",
+        options: [
+            "School",
+            "College",
+            "Online"
+        ],
+        answer: "School"
+    },
+
+    {
+        image: "sheet2.png",
+        question:
+            "Did we actually meet often after school?",
+        options: [
+            "Yes",
+            "No",
+            "Every day"
+        ],
+        answer: "No"
+    },
+
+    {
+        image: "sheet3.png",
+        question:
+            "What kept our friendship going?",
+        options: [
+            "Phone chats",
+            "Travelling together",
+            "Same college"
+        ],
+        answer: "Phone chats"
+    },
+
+    {
+        image: "sheet4.png",
+        question:
+            "And now... are we still friends?",
+        options: [
+            "Obviously 😂",
+            "No",
+            "Maybe"
+        ],
+        answer: "Obviously 😂"
+    }
+];
+
+let currentStoryPage = 0;
+
+
+/* =========================================================
+   OPEN STORY
+========================================================= */
+
+closedBook.addEventListener(
+    "click",
+    function () {
+
+        closedBook.classList.add(
+            "hidden"
         );
 
-    clip-path:
-        polygon(
-            0 0,
-            50% 55%,
-            100% 0,
-            100% 100%,
-            0 100%
+        openBookButton.classList.remove(
+            "hidden"
+        );
+    }
+);
+
+
+openBookButton.addEventListener(
+    "click",
+    function () {
+
+        openBookButton.classList.add(
+            "hidden"
         );
 
-    border-radius: 0 0 8px 8px;
-
-    z-index: 4;
-}
-
-
-/* Top flap */
-
-.envelope-flap {
-    position: absolute;
-
-    top: 0;
-    left: 0;
-
-    width: 100%;
-
-    height: 65%;
-
-    background:
-        linear-gradient(
-            135deg,
-            #e1bd97,
-            #bd8c65
+        openBook.classList.remove(
+            "hidden"
         );
 
-    clip-path:
-        polygon(
-            0 0,
-            100% 0,
-            50% 78%
+        currentStoryPage = 0;
+
+        showStoryPage(
+            currentStoryPage
+        );
+    }
+);
+
+
+/* =========================================================
+   SHOW STORY PAGE
+========================================================= */
+
+function showStoryPage(index) {
+
+    if (
+        index < 0 ||
+        index >= storyPages.length
+    ) {
+        return;
+    }
+
+    currentStoryPage = index;
+
+    const page =
+        storyPages[
+            currentStoryPage
+        ];
+
+    storyPageImage.src =
+        page.image;
+
+    pageNumber.textContent =
+        String(
+            currentStoryPage + 1
+        ).padStart(2, "0");
+
+    storyQuestion.classList.add(
+        "hidden"
+    );
+
+    answerFeedback.textContent = "";
+
+    storyAssistant.classList.remove(
+        "hidden"
+    );
+
+    storySpeech.textContent =
+        currentStoryPage ===
+        storyPages.length - 1
+            ? "One last question..."
+            : "Turn the page...";
+
+    setTimeout(
+        function () {
+            showStoryQuestion();
+        },
+        500
+    );
+}
+
+
+/* =========================================================
+   SHOW STORY QUESTION
+========================================================= */
+
+function showStoryQuestion() {
+
+    const page =
+        storyPages[
+            currentStoryPage
+        ];
+
+    questionText.textContent =
+        page.question;
+
+    answerOptions.innerHTML = "";
+
+    page.options.forEach(
+        function (option) {
+
+            const button =
+                document.createElement(
+                    "button"
+                );
+
+            button.className =
+                "answer-option";
+
+            button.textContent =
+                option;
+
+            button.addEventListener(
+                "click",
+                function () {
+                    checkStoryAnswer(
+                        option
+                    );
+                }
+            );
+
+            answerOptions.appendChild(
+                button
+            );
+        }
+    );
+
+    storyQuestion.classList.remove(
+        "hidden"
+    );
+}
+
+
+/* =========================================================
+   CHECK STORY ANSWER
+========================================================= */
+
+function checkStoryAnswer(
+    selectedAnswer
+) {
+
+    const page =
+        storyPages[
+            currentStoryPage
+        ];
+
+    if (
+        selectedAnswer ===
+        page.answer
+    ) {
+
+        answerFeedback.textContent =
+            "Exactly! 😌";
+
+    } else {
+
+        answerFeedback.textContent =
+            "Nice try 😂";
+    }
+
+    setTimeout(
+        function () {
+
+            if (
+                currentStoryPage <
+                storyPages.length - 1
+            ) {
+
+                nextStoryPage();
+
+            } else {
+
+                closeStory();
+            }
+
+        },
+        1200
+    );
+}
+
+
+/* =========================================================
+   NEXT STORY PAGE
+========================================================= */
+
+function nextStoryPage() {
+
+    currentStoryPage++;
+
+    showStoryPage(
+        currentStoryPage
+    );
+}
+
+
+/* =========================================================
+   CLOSE STORY
+========================================================= */
+
+function closeStory() {
+
+    openBook.classList.add(
+        "hidden"
+    );
+
+    storyClosing.classList.remove(
+        "hidden"
+    );
+
+    if (storyTune) {
+        storyTune.pause();
+    }
+}
+
+
+storyClosing.addEventListener(
+    "click",
+    function () {
+
+        storySection.classList.add(
+            "hidden"
         );
 
-    border-radius: 8px 8px 0 0;
+        photosSection.classList.remove(
+            "hidden"
+        );
 
-    z-index: 5;
+        photosSection.scrollIntoView({
+            behavior: "smooth"
+        });
+    }
+);
 
-    transform-origin: top center;
 
-    transition:
-        transform 0.6s ease;
+/* =========================================================
+   MEMORY PHOTOS
+========================================================= */
+
+const memoryPhoto =
+    document.getElementById(
+        "memoryPhoto"
+    );
+
+const memoryCaption =
+    document.getElementById(
+        "memoryCaption"
+    );
+
+const memoryCurrent =
+    document.getElementById(
+        "memoryCurrent"
+    );
+
+const memoryDots =
+    document.getElementById(
+        "memoryDots"
+    );
+
+const memoryPrev =
+    document.getElementById(
+        "memoryPrev"
+    );
+
+const memoryNext =
+    document.getElementById(
+        "memoryNext"
+    );
+
+
+const memoryPhotos = [
+    "pic1.jpg",
+    "pic2.jpg",
+    "pic3.jpg",
+    "pic4.jpg",
+    "pic5.jpg",
+    "pic6.jpg",
+    "pic7.jpg",
+    "pic8.jpg",
+    "pic9.jpg"
+];
+
+
+const memoryCaptions = [
+    "Where it began",
+    "Little moments",
+    "Good memories",
+    "Those days",
+    "Still special",
+    "Random memories",
+    "A little throwback",
+    "More memories",
+    "Here we are"
+];
+
+
+let currentMemory = 0;
+
+
+/* =========================================================
+   MEMORY DOTS
+========================================================= */
+
+memoryPhotos.forEach(
+    function (_, index) {
+
+        const dot =
+            document.createElement(
+                "span"
+            );
+
+        dot.className =
+            "memory-dot";
+
+        dot.addEventListener(
+            "click",
+            function () {
+
+                showMemory(index);
+            }
+        );
+
+        memoryDots.appendChild(
+            dot
+        );
+    }
+);
+
+
+/* =========================================================
+   SHOW MEMORY
+========================================================= */
+
+function showMemory(index) {
+
+    if (index < 0) {
+        index =
+            memoryPhotos.length - 1;
+    }
+
+    if (
+        index >=
+        memoryPhotos.length
+    ) {
+        index = 0;
+    }
+
+    currentMemory = index;
+
+    memoryPhoto.src =
+        memoryPhotos[
+            currentMemory
+        ];
+
+    memoryPhoto.alt =
+        "Memory " +
+        (currentMemory + 1);
+
+    memoryCaption.textContent =
+        memoryCaptions[
+            currentMemory
+        ];
+
+    memoryCurrent.textContent =
+        String(
+            currentMemory + 1
+        ).padStart(2, "0") +
+        " / " +
+        String(
+            memoryPhotos.length
+        ).padStart(2, "0");
+
+    const dots =
+        document.querySelectorAll(
+            ".memory-dot"
+        );
+
+    dots.forEach(
+        function (dot, dotIndex) {
+
+            dot.classList.toggle(
+                "active",
+                dotIndex ===
+                currentMemory
+            );
+        }
+    );
 }
 
 
-/* Label */
+/* =========================================================
+   MEMORY ARROWS
+========================================================= */
 
-.envelope-label {
-    position: absolute;
+memoryPrev.addEventListener(
+    "click",
+    function () {
 
-    left: 50%;
+        showMemory(
+            currentMemory - 1
+        );
+    }
+);
 
-    top: 52%;
 
-    transform:
-        translate(-50%, -50%);
+memoryNext.addEventListener(
+    "click",
+    function () {
 
-    z-index: 6;
+        showMemory(
+            currentMemory + 1
+        );
+    }
+);
 
-    padding: 10px 25px;
 
-    border: 1px solid #98704f;
+/* =========================================================
+   MEMORY KEYBOARD
+========================================================= */
 
-    background: #ead1b3;
+document.addEventListener(
+    "keydown",
+    function (event) {
 
-    color: #593a29;
+        const lightbox =
+            document.getElementById(
+                "snapLightbox"
+            );
 
-    border-radius: 3px;
+        if (
+            lightbox &&
+            !lightbox.classList.contains(
+                "hidden"
+            )
+        ) {
+            return;
+        }
 
-    font-size: 1.1rem;
+        if (
+            photosSection.classList.contains(
+                "hidden"
+            )
+        ) {
+            return;
+        }
 
-    letter-spacing: 2px;
+        if (
+            event.key ===
+            "ArrowLeft"
+        ) {
 
-    box-shadow:
-        0 5px 12px rgba(0, 0, 0, 0.15);
+            showMemory(
+                currentMemory - 1
+            );
+        }
+
+        if (
+            event.key ===
+            "ArrowRight"
+        ) {
+
+            showMemory(
+                currentMemory + 1
+            );
+        }
+    }
+);
+
+
+/* =========================================================
+   MEMORY MOBILE SWIPE
+========================================================= */
+
+let memoryTouchStartX = 0;
+let memoryTouchEndX = 0;
+
+
+memoryPhoto.addEventListener(
+    "touchstart",
+    function (event) {
+
+        memoryTouchStartX =
+            event.changedTouches[0]
+                .screenX;
+    },
+    {
+        passive: true
+    }
+);
+
+
+memoryPhoto.addEventListener(
+    "touchend",
+    function (event) {
+
+        memoryTouchEndX =
+            event.changedTouches[0]
+                .screenX;
+
+        const difference =
+            memoryTouchStartX -
+            memoryTouchEndX;
+
+        if (
+            Math.abs(difference) <
+            50
+        ) {
+            return;
+        }
+
+        if (difference > 0) {
+
+            showMemory(
+                currentMemory + 1
+            );
+
+        } else {
+
+            showMemory(
+                currentMemory - 1
+            );
+        }
+    },
+    {
+        passive: true
+    }
+);
+
+
+/* =========================================================
+   INITIAL MEMORY
+========================================================= */
+
+showMemory(0);
+
+
+/* =========================================================
+   BEFORE SNAP QUESTIONS
+========================================================= */
+
+const snapQuestions =
+    document.getElementById(
+        "snapQuestions"
+    );
+
+const snapQuestionTitle =
+    document.getElementById(
+        "snapQuestionTitle"
+    );
+
+const snapQuestionOptions =
+    document.getElementById(
+        "snapQuestionOptions"
+    );
+
+const snapQuestionFeedback =
+    document.getElementById(
+        "snapQuestionFeedback"
+    );
+
+
+let currentSnapQuestion = 0;
+
+
+const beforeSnapQuestions = [
+
+    {
+        question:
+            "Do we have pictures together?",
+
+        noAnswer:
+            "Yes, we do 😂"
+    },
+
+    {
+        question:
+            "Did we have coffee together?",
+
+        noAnswer:
+            "Yes, we did 😂"
+    }
+];
+
+
+/* =========================================================
+   SHOW SNAP QUESTIONS
+========================================================= */
+
+function showSnapQuestions() {
+
+    currentSnapQuestion = 0;
+
+    snapQuestionTitle.textContent =
+        beforeSnapQuestions[
+            currentSnapQuestion
+        ].question;
+
+    snapQuestionFeedback.textContent =
+        "";
+
+    snapQuestions.classList.add(
+        "show-questions"
+    );
+
+    snapQuestions.scrollIntoView({
+        behavior: "smooth"
+    });
 }
 
 
-.envelope-hint {
-    color: #9f8067;
+/* =========================================================
+   SNAP ANSWER BUTTONS
+========================================================= */
 
-    font-size: 0.9rem;
+const snapAnswerButtons =
+    document.querySelectorAll(
+        ".snap-answer-button"
+    );
 
-    letter-spacing: 2px;
 
-    margin-top: 20px;
+snapAnswerButtons.forEach(
+    function (button) {
+
+        button.addEventListener(
+            "click",
+            function () {
+
+                const answer =
+                    button.dataset.answer;
+
+                handleSnapAnswer(
+                    answer
+                );
+            }
+        );
+    }
+);
+
+
+/* =========================================================
+   HANDLE SNAP ANSWER
+   2 SECOND DELAY
+========================================================= */
+
+function handleSnapAnswer(answer) {
+
+    const currentQuestion =
+        beforeSnapQuestions[
+            currentSnapQuestion
+        ];
+
+    if (answer === "no") {
+
+        snapQuestionFeedback.textContent =
+            currentQuestion.noAnswer;
+
+    } else {
+
+        snapQuestionFeedback.textContent =
+            "Exactly! 😌";
+    }
+
+
+    setTimeout(
+        function () {
+
+            currentSnapQuestion++;
+
+            if (
+                currentSnapQuestion <
+                beforeSnapQuestions.length
+            ) {
+
+                showNextSnapQuestion();
+
+            } else {
+
+                showOurSnaps();
+            }
+
+        },
+        2000
+    );
 }
 
 
-/* =========================
-   LETTER OVERLAY
-========================= */
+/* =========================================================
+   NEXT SNAP QUESTION
+========================================================= */
 
-.letter-overlay {
-    position: fixed;
+function showNextSnapQuestion() {
 
-    inset: 0;
+    snapQuestionTitle.textContent =
+        beforeSnapQuestions[
+            currentSnapQuestion
+        ].question;
 
-    z-index: 2000;
-
-    background:
-        rgba(10, 5, 3, 0.96);
-
-    display: flex;
-
-    align-items: center;
-
-    justify-content: center;
-
-    padding: 30px;
-
-    overflow-y: auto;
+    snapQuestionFeedback.textContent =
+        "";
 }
 
 
-body.letter-open {
-    overflow: hidden;
+/* =========================================================
+   SHOW OUR SNAPS
+========================================================= */
+
+function showOurSnaps() {
+
+    const nextSection =
+        document.getElementById(
+            "nextSection"
+        );
+
+    snapQuestions.classList.remove(
+        "show-questions"
+    );
+
+    nextSection.classList.add(
+        "show-snaps"
+    );
+
+    nextSection.scrollIntoView({
+        behavior: "smooth"
+    });
 }
 
 
-.letter-image-wrapper {
-    max-width: 900px;
+/* =========================================================
+   KEEP GOING
+========================================================= */
 
-    max-height: 92vh;
+const photosNextButton =
+    document.getElementById(
+        "photosNextButton"
+    );
 
-    display: flex;
 
-    align-items: center;
+photosNextButton.addEventListener(
+    "click",
+    function () {
 
-    justify-content: center;
+        showSnapQuestions();
+    }
+);
 
-    animation:
-        letterAppear 0.5s ease;
+
+/* =========================================================
+   OUR SNAPS
+========================================================= */
+
+const snapItems =
+    document.querySelectorAll(
+        ".snap-item"
+    );
+
+
+const snapLightbox =
+    document.getElementById(
+        "snapLightbox"
+    );
+
+
+const snapLightboxImage =
+    document.getElementById(
+        "snapLightboxImage"
+    );
+
+
+const snapCounter =
+    document.getElementById(
+        "snapCounter"
+    );
+
+
+const snapClose =
+    document.getElementById(
+        "snapClose"
+    );
+
+
+const snapPrev =
+    document.getElementById(
+        "snapPrev"
+    );
+
+
+const snapNext =
+    document.getElementById(
+        "snapNext"
+    );
+
+
+const snapPhotos = [
+    "snap1.jpg",
+    "snap2.jpg",
+    "snap3.jpg",
+    "snap4.jpg",
+    "snap5.jpg",
+    "snap6.jpg",
+    "snap7.jpg"
+];
+
+
+/* =========================================================
+   SNAP TITLES
+========================================================= */
+
+const snapTitles = [
+
+    "That day 😂",
+
+    "One of those moments",
+
+    "Still remember this",
+
+    "Random but special",
+
+    "Coffee together",
+
+    "Selfie",
+
+    "And here we are"
+];
+
+
+/* =========================================================
+   ADD SNAP TITLES + MAIN HEADING
+========================================================= */
+
+/*
+   These changes are done through JS so
+   your HTML does not need to be changed.
+*/
+
+
+const snapHeading =
+    document.querySelector(
+        ".snap-heading h2"
+    );
+
+
+if (snapHeading) {
+
+    snapHeading.textContent =
+        "Memories That We Cherish Virtually 😂";
 }
 
 
-.letter-image-wrapper img {
-    display: block;
+/*
+   Change the seven visible captions
+*/
 
-    max-width: 90vw;
+const snapLabels =
+    document.querySelectorAll(
+        ".snap-label"
+    );
 
-    max-height: 90vh;
 
-    width: auto;
+snapLabels.forEach(
+    function (label, index) {
 
-    height: auto;
+        if (
+            snapTitles[index]
+        ) {
 
-    object-fit: contain;
+            label.textContent =
+                snapTitles[index];
+        }
+    }
+);
 
-    box-shadow:
-        0 25px 80px rgba(0, 0, 0, 0.65);
 
-    border-radius: 4px;
+/* =========================================================
+   CURRENT SNAP
+========================================================= */
+
+let currentSnap = 0;
+
+
+/* =========================================================
+   SHOW SNAP
+========================================================= */
+
+function showSnap(index) {
+
+    if (index < 0) {
+
+        index =
+            snapPhotos.length - 1;
+    }
+
+
+    if (
+        index >=
+        snapPhotos.length
+    ) {
+
+        index = 0;
+    }
+
+
+    currentSnap = index;
+
+
+    snapLightboxImage.src =
+        snapPhotos[
+            currentSnap
+        ];
+
+
+    snapLightboxImage.alt =
+        snapTitles[
+            currentSnap
+        ];
+
+
+    snapCounter.textContent =
+        String(
+            currentSnap + 1
+        ).padStart(2, "0") +
+        " / " +
+        String(
+            snapPhotos.length
+        ).padStart(2, "0");
 }
 
 
-.letter-close {
-    position: fixed;
+/* =========================================================
+   OPEN SNAP
+========================================================= */
 
-    top: 25px;
-    right: 30px;
+function openSnap(index) {
 
-    width: 48px;
-    height: 48px;
+    showSnap(index);
 
-    border-radius: 50%;
+    snapLightbox.classList.remove(
+        "hidden"
+    );
 
-    border: 1px solid #80553b;
-
-    background: #2b1710;
-
-    color: #f0d8be;
-
-    font-size: 1.8rem;
-
-    cursor: pointer;
-
-    z-index: 2001;
-
-    transition: 0.25s ease;
+    document.body.classList.add(
+        "snap-open"
+    );
 }
 
 
-.letter-close:hover {
-    background: #573224;
+/* =========================================================
+   CLOSE SNAP
+========================================================= */
 
-    transform: scale(1.08);
+function closeSnap() {
+
+    snapLightbox.classList.add(
+        "hidden"
+    );
+
+    document.body.classList.remove(
+        "snap-open"
+    );
 }
 
 
-@keyframes letterAppear {
+/* =========================================================
+   SNAP CLICK
+========================================================= */
 
-    from {
-        opacity: 0;
+snapItems.forEach(
+    function (item, index) {
 
-        transform:
-            scale(0.94)
-            translateY(20px);
+        item.addEventListener(
+            "click",
+            function () {
+
+                openSnap(index);
+            }
+        );
+    }
+);
+
+
+/* =========================================================
+   SNAP BUTTONS
+========================================================= */
+
+snapClose.addEventListener(
+    "click",
+    closeSnap
+);
+
+
+snapPrev.addEventListener(
+    "click",
+    function () {
+
+        showSnap(
+            currentSnap - 1
+        );
+    }
+);
+
+
+snapNext.addEventListener(
+    "click",
+    function () {
+
+        showSnap(
+            currentSnap + 1
+        );
+    }
+);
+
+
+/* =========================================================
+   CLICK OUTSIDE SNAP
+========================================================= */
+
+snapLightbox.addEventListener(
+    "click",
+    function (event) {
+
+        if (
+            event.target ===
+            snapLightbox
+        ) {
+
+            closeSnap();
+        }
+    }
+);
+
+
+/* =========================================================
+   SNAP KEYBOARD
+========================================================= */
+
+document.addEventListener(
+    "keydown",
+    function (event) {
+
+        if (
+            snapLightbox.classList.contains(
+                "hidden"
+            )
+        ) {
+            return;
+        }
+
+
+        if (
+            event.key ===
+            "Escape"
+        ) {
+
+            closeSnap();
+        }
+
+
+        if (
+            event.key ===
+            "ArrowLeft"
+        ) {
+
+            showSnap(
+                currentSnap - 1
+            );
+        }
+
+
+        if (
+            event.key ===
+            "ArrowRight"
+        ) {
+
+            showSnap(
+                currentSnap + 1
+            );
+        }
+    }
+);
+
+
+/* =========================================================
+   SNAP MOBILE SWIPE
+========================================================= */
+
+let snapTouchStartX = 0;
+let snapTouchEndX = 0;
+
+
+snapLightboxImage.addEventListener(
+    "touchstart",
+    function (event) {
+
+        snapTouchStartX =
+            event.changedTouches[0]
+                .screenX;
+    },
+    {
+        passive: true
+    }
+);
+
+
+snapLightboxImage.addEventListener(
+    "touchend",
+    function (event) {
+
+        snapTouchEndX =
+            event.changedTouches[0]
+                .screenX;
+
+
+        const difference =
+            snapTouchStartX -
+            snapTouchEndX;
+
+
+        if (
+            Math.abs(difference) <
+            50
+        ) {
+            return;
+        }
+
+
+        if (difference > 0) {
+
+            showSnap(
+                currentSnap + 1
+            );
+
+        } else {
+
+            showSnap(
+                currentSnap - 1
+            );
+        }
+    },
+    {
+        passive: true
+    }
+);
+
+
+/* =========================================================
+   A GIFT FOR YOU
+========================================================= */
+
+const giftSection =
+    document.getElementById(
+        "giftSection"
+    );
+
+
+const envelope =
+    document.getElementById(
+        "envelope"
+    );
+
+
+const letterOverlay =
+    document.getElementById(
+        "letterOverlay"
+    );
+
+
+const letterClose =
+    document.getElementById(
+        "letterClose"
+    );
+
+
+/* =========================================================
+   SHOW GIFT SECTION
+========================================================= */
+
+function showGiftSection() {
+
+    if (!giftSection) {
+        return;
     }
 
-    to {
-        opacity: 1;
-
-        transform:
-            scale(1)
-            translateY(0);
-    }
-
+    giftSection.classList.remove(
+        "hidden"
+    );
 }
 
 
-/* =========================
-   GIFT MOBILE
-========================= */
+/* =========================================================
+   SHOW GIFT AFTER SNAPS
+========================================================= */
 
-@media (max-width: 700px) {
+function showOurSnaps() {
 
-    .gift-section {
-        padding: 90px 15px;
+    const nextSection =
+        document.getElementById(
+            "nextSection"
+        );
+
+
+    snapQuestions.classList.remove(
+        "show-questions"
+    );
+
+
+    nextSection.classList.add(
+        "show-snaps"
+    );
+
+
+    /*
+       Make the Gift section available
+       after the Snap section.
+    */
+
+    showGiftSection();
+
+
+    nextSection.scrollIntoView({
+        behavior: "smooth"
+    });
+}
+
+
+/* =========================================================
+   OPEN LETTER
+========================================================= */
+
+envelope.addEventListener(
+    "click",
+    function () {
+
+        letterOverlay.classList.remove(
+            "hidden"
+        );
+
+        document.body.classList.add(
+            "letter-open"
+        );
     }
+);
 
 
-    .gift-content h2 {
-        font-size: 3rem;
+/* =========================================================
+   CLOSE LETTER
+========================================================= */
+
+function closeLetter() {
+
+    letterOverlay.classList.add(
+        "hidden"
+    );
+
+    document.body.classList.remove(
+        "letter-open"
+    );
+}
+
+
+letterClose.addEventListener(
+    "click",
+    closeLetter
+);
+
+
+/* =========================================================
+   CLICK OUTSIDE LETTER
+========================================================= */
+
+letterOverlay.addEventListener(
+    "click",
+    function (event) {
+
+        if (
+            event.target ===
+            letterOverlay
+        ) {
+
+            closeLetter();
+        }
     }
+);
 
 
-    .gift-subtitle {
-        font-size: 1rem;
+/* =========================================================
+   ESCAPE TO CLOSE LETTER
+========================================================= */
 
-        margin-bottom: 35px;
+document.addEventListener(
+    "keydown",
+    function (event) {
+
+        if (
+            event.key === "Escape" &&
+            !letterOverlay.classList.contains(
+                "hidden"
+            )
+        ) {
+
+            closeLetter();
+        }
     }
+);
 
 
-    .envelope {
-        width: 85vw;
-
-        height: 55vw;
-
-        max-height: 300px;
-    }
-
-
-    .envelope-label {
-        font-size: 0.9rem;
-
-        padding: 8px 18px;
-    }
-
-
-    .envelope-hint {
-        font-size: 0.75rem;
-    }
-
-
-    .letter-overlay {
-        padding: 15px;
-    }
-
-
-    .letter-image-wrapper img {
-        max-width: 94vw;
-
-        max-height: 88vh;
-    }
-
-
-    .letter-close {
-        top: 12px;
-        right: 12px;
-
-        width: 40px;
-        height: 40px;
-
-        font-size: 1.5rem;
-    }
-    /* =========================
+/* =========================================================
    THE END
-========================= */
+========================================================= */
 
-.end-section {
-    min-height: 100vh;
+/*
+   The End section already exists in your HTML.
+   It remains after the Gift section.
 
-    display: flex;
-
-    align-items: center;
-    justify-content: center;
-
-    text-align: center;
-
-    padding: 30px;
-}
-
-.end-section p {
-    font-size: clamp(3rem, 8vw, 6rem);
-
-    color: #d7b28e;
-
-    letter-spacing: 6px;
-
-    font-weight: normal;
-}
-
-}
+   Nothing is automatically moved there,
+   so the user can open/read the letter
+   and continue scrolling manually.
+*/
+```
